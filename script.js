@@ -3,9 +3,28 @@ const chatBox = document.getElementById("chatBox");
 const userInput = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
 
+// Load saved chat history on page load
+window.addEventListener('DOMContentLoaded', function() {
+    loadChatHistory();
+    loadDarkMode();
+});
+
 userInput.addEventListener("keypress", function(e) {
     if (e.key === "Enter") {
         sendMessage();
+    }
+});
+
+// Character counter
+userInput.addEventListener('input', function() {
+    const charCount = document.getElementById('charCount');
+    const length = this.value.length;
+    charCount.textContent = `${length}/500`;
+    
+    if (length > 500) {
+        charCount.style.color = 'red';
+    } else {
+        charCount.style.color = '';
     }
 });
 
@@ -20,6 +39,9 @@ function addMessage(text, isUser) {
     msgDiv.appendChild(textDiv);
     chatBox.appendChild(msgDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
+    
+    // Save chat history after each message
+    saveChatHistory();
 }
 
 function showLoading() {
@@ -38,6 +60,38 @@ function removeLoading() {
 
 function clearChat() {
     chatBox.innerHTML = '<div class="message ai-msg"><div class="msg-text">Hello! Ask me anything.</div></div>';
+    saveChatHistory();
+}
+
+function saveChatHistory() {
+    localStorage.setItem('geminiChatHistory', chatBox.innerHTML);
+}
+
+function loadChatHistory() {
+    const savedChat = localStorage.getItem('geminiChatHistory');
+    if (savedChat) {
+        chatBox.innerHTML = savedChat;
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', isDark);
+    
+    // Change button emoji
+    const btn = document.querySelector('.dark-mode-toggle');
+    btn.textContent = isDark ? '☀️' : '🌙';
+}
+
+function loadDarkMode() {
+    const isDark = localStorage.getItem('darkMode') === 'true';
+    if (isDark) {
+        document.body.classList.add('dark-mode');
+        const btn = document.querySelector('.dark-mode-toggle');
+        btn.textContent = '☀️';
+    }
 }
 
 async function sendMessage() {
