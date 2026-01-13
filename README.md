@@ -1,106 +1,97 @@
-Gemini AI Chatbot 🤖
+# Gemini AI Chatbot 🤖
 
-This is a simple AI chatbot web project built using HTML, CSS, and JavaScript, with the goal of integrating Google’s Gemini AI.
-The project focuses on creating a basic chat interface where users can type messages and receive AI-generated responses.
+A simple AI chatbot web application built with HTML, CSS, and JavaScript, powered by Google's Gemini AI.
 
-This project is mainly for learning and practice, especially for understanding how AI APIs can be connected with a web interface.
+## Features
 
-About the Project
+- 💬 Real-time chat interface
+- 🤖 Powered by Gemini AI
+- 🧹 Clear chat history
+- ⌨️ Enter key support
+- 📱 Responsive design
 
-The idea behind this project is to build a chatbot similar to ChatGPT, but powered by Gemini AI.
-Right now, the project includes the frontend UI for the chatbot and is ready to be connected with the Gemini API.
+## Project Structure
 
-It’s a good starting point if you want to explore:
-
-How AI chat interfaces work
-
-How to connect APIs with JavaScript
-
-How to structure a small AI-based web project
-
-Features
-
-Simple and clean chatbot UI
-
-User input and AI response layout
-
-Frontend built without frameworks
-
-Easy to understand and modify
-
-Ready for Gemini API integration
-
-Note: This is currently a frontend-only project. AI responses will work once the Gemini API is properly connected.
-
-Tech Stack
-
-HTML – Structure of the chatbot
-
-CSS – Styling and layout
-
-JavaScript – Chat logic and API handling
-
-No backend is included yet.
-
-Project Structure
+```
 Gemini-AI-Chatbot/
-├── Gemni index.html
-├── (other frontend files)
-└── README.md
+├── index.html          # Main HTML file
+├── style.css           # Stylesheet
+├── script.js           # JavaScript logic
+├── config.example.js   # Config template
+├── .gitignore          # Git ignore file
+└── README.md           # This file
+```
 
-How to Run
+## Setup Instructions
 
-Clone the repository:
+### 1. Clone the repository
 
+```bash
 git clone https://github.com/avy2025/Gemini-AI-Chatbot.git
+cd Gemini-AI-Chatbot
+```
 
+### 2. Get a Gemini API Key
 
-Open the project folder
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Sign in with your Google account
+3. Click "Create API Key"
+4. Copy your API key
 
-Open Gemni index.html in your browser
+### 3. Configure the API Key
 
-That’s it. The chatbot UI will load.
+1. Copy the example config file:
+   ```bash
+   cp config.example.js config.js
+   ```
 
-How to Make It Work with Gemini AI
+2. Open `config.js` and replace `YOUR_API_KEY_HERE` with your actual API key:
+   ```javascript
+   const CONFIG = {
+       GEMINI_API_KEY: "your-actual-api-key-here"
+   };
+   ```
 
-To get real AI responses:
+⚠️ **Important:** Never commit `config.js` to GitHub! It's already in `.gitignore`.
 
-Get a Gemini API key from Google AI Studio
+### 4. Run the Application
 
-Add the API key in your JavaScript file
+Simply open `index.html` in your web browser. No server needed!
 
-Send user messages to the Gemini model and display the response in the chat UI
+## Usage
 
-⚠️ For security reasons, it’s better to connect the API through a backend instead of exposing the key in frontend code.
+1. Type your message in the input field
+2. Click "Send" or press Enter
+3. Wait for the AI to respond
+4. Use "Clear Chat" to reset the conversation
 
-Future Improvements
+## Technologies Used
 
-Some things that can be added later:
+- HTML5
+- CSS3
+- JavaScript (ES6+)
+- Google Gemini AI API
 
-Backend integration (Node.js / Python)
+## Security Note
 
-Secure API handling
+This is a frontend-only implementation. For production use, it's recommended to:
+- Use a backend server to handle API calls
+- Store API keys securely on the server
+- Implement rate limiting
 
-Chat history
+## Future Improvements
 
-Better UI/UX
+- [ ] Save chat history (localStorage)
+- [ ] Quick suggestion buttons
+- [ ] Copy response feature
+- [ ] Dark mode
+- [ ] Export chat history
+- [ ] Voice input
 
-Dark mode
+## Author
 
-Voice input support
+Created by [avy2025](https://github.com/avy2025)
 
-Why This Project?
+## License
 
-This project is useful for:
-
-College mini projects
-
-Learning AI API integration
-
-Portfolio demonstration
-
-Practicing frontend + AI concepts
-
-Author
-
-Created by avy2025
+This project is open source and available for educational purposes.
