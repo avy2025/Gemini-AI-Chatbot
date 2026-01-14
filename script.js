@@ -94,6 +94,11 @@ function loadDarkMode() {
     }
 }
 
+function askQuestion(question) {
+    userInput.value = question;
+    sendMessage();
+}
+
 async function sendMessage() {
     const message = userInput.value.trim();
     
