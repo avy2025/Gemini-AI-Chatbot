@@ -116,7 +116,7 @@ async function sendMessage() {
 
     try {
         const response = await fetch(
-            "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" + API_KEY,
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + API_KEY,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -132,6 +132,11 @@ async function sendMessage() {
         const data = await response.json();
         removeLoading();
 
+        if (!response.ok) {
+            addMessage("API Error: " + (data.error?.message || response.statusText), false);
+            return;
+        }
+
         if (data.candidates && data.candidates.length > 0) {
             const reply = data.candidates[0].content.parts[0].text;
             addMessage(reply, false);
@@ -140,8 +145,8 @@ async function sendMessage() {
         }
     } catch (error) {
         removeLoading();
-        addMessage("Error: Could not connect to AI.", false);
-        console.error(error);
+        console.error("Error:", error);
+        addMessage("Error: " + error.message, false);
     }
 
     sendBtn.disabled = false;

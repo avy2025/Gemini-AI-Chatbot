@@ -221,3 +221,81 @@ button:disabled {
 body.dark-mode .loading {
     color: #999;
 }
+
+.msg-text h1, .msg-text h2, .msg-text h3 {
+    margin: 8px 0;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.msg-text p {
+    margin: 6px 0;
+}
+
+.msg-text code {
+    background-color: rgba(0,0,0,0.1);
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+body.dark-mode .msg-text code {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.msg-text pre {
+    background-color: #2d2d2d;
+    color: #f8f8f8;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin: 8px 0;
+}
+
+.msg-text pre code {
+    background-color: transparent;
+    padding: 0;
+}
+
+.msg-text ul, .msg-text ol {
+    margin: 6px 0;
+    padding-left: 20px;
+}
+
+.msg-text li {
+    margin: 3px 0;
+}
+
+.msg-text strong {
+    font-weight: bold;
+}
+
+.msg-text em {
+    font-style: italic;
+}
+
+.msg-text a {
+    color: #4285f4;
+    text-decoration: none;
+}
+
+.msg-text a:hover {
+    text-decoration: underline;
+}
+
+body.dark-mode .msg-text a {
+    color: #64b5f6;
+}
+
+.msg-text blockquote {
+    border-left: 3px solid #ddd;
+    margin: 8px 0;
+    padding-left: 12px;
+    color: #666;
+}
+
+body.dark-mode .msg-text blockquote {
+    border-left-color: #555;
+    color: #999;
+}
