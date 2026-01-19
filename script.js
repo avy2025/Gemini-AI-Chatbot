@@ -60,19 +60,133 @@ function removeLoading() {
 
 function clearChat() {
     chatBox.innerHTML = '<div class="message ai-msg"><div class="msg-text">Hello! Ask me anything.</div></div>';
-    saveChatHistory();
+    saveCurrentSession();
 }
 
 function saveChatHistory() {
-    localStorage.setItem('geminiChatHistory', chatBox.innerHTML);
+    saveCurrentSession();
 }
 
 function loadChatHistory() {
-    const savedChat = localStorage.getItem('geminiChatHistory');
-    if (savedChat) {
-        chatBox.innerHTML = savedChat;
+    if (currentSessionId && sessions[currentSessionId]) {
+        chatBox.innerHTML = sessions[currentSessionId].messages;
         chatBox.scrollTop = chatBox.scrollHeight;
     }
+}
+
+function loadSessions() {
+    const saved = localStorage.getItem('chatSessions');
+    if (saved) {
+        sessions = JSON.parse(saved);
+    }
+    
+    if (Object.keys(sessions).length === 0) {
+        createNewSession();
+    } else {
+        const lastSession = localStorage.getItem('lastSessionId');
+        if (lastSession && sessions[lastSession]) {
+            switchSession(lastSession);
+        } else {
+            switchSession(Object.keys(sessions)[0]);
+        }
+    }
+    
+    renderSessionList();
+}
+
+function createNewSession() {
+    const sessionId = 'session_' + Date.now();
+    sessions[sessionId] = {
+        id: sessionId,
+        name: 'New Chat',
+        messages: '<div class="message ai-msg"><div class="msg-text">Hello! Ask me anything.</div></div>',
+        createdAt: Date.now()
+    };
+    
+    saveSessions();
+    switchSession(sessionId);
+    renderSessionList();
+}
+
+function switchSession(sessionId) {
+    if (currentSessionId) {
+        saveCurrentSession();
+    }
+    
+    currentSessionId = sessionId;
+    localStorage.setItem('lastSessionId', sessionId);
+    loadChatHistory();
+    renderSessionList();
+}
+
+function deleteSession(sessionId) {
+    if (Object.keys(sessions).length === 1) {
+        alert('Cannot delete the last session');
+        return;
+    }
+    
+    if (confirm('Delete this chat session?')) {
+        delete sessions[sessionId];
+        saveSessions();
+        
+        if (currentSessionId === sessionId) {
+            const newSessionId = Object.keys(sessions)[0];
+            switchSession(newSessionId);
+        }
+        
+        renderSessionList();
+    }
+}
+
+function saveCurrentSession() {
+    if (currentSessionId && sessions[currentSessionId]) {
+        sessions[currentSessionId].messages = chatBox.innerHTML;
+        
+        const lastMsg = chatBox.querySelector('.message:last-child .msg-text');
+        if (lastMsg) {
+            const preview = lastMsg.textContent.substring(0, 30);
+            sessions[currentSessionId].preview = preview;
+        }
+        
+        saveSessions();
+    }
+}
+
+function saveSessions() {
+    localStorage.setItem('chatSessions', JSON.stringify(sessions));
+}
+
+function renderSessionList() {
+    sessionList.innerHTML = '';
+    
+    const sortedSessions = Object.values(sessions).sort((a, b) => b.createdAt - a.createdAt);
+    
+    sortedSessions.forEach(session => {
+        const item = document.createElement('div');
+        item.className = 'session-item' + (session.id === currentSessionId ? ' active' : '');
+        item.onclick = () => switchSession(session.id);
+        
+        const name = document.createElement('div');
+        name.className = 'session-name';
+        name.textContent = session.name;
+        
+        const preview = document.createElement('div');
+        preview.className = 'session-preview';
+        preview.textContent = session.preview || 'New conversation';
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-session';
+        deleteBtn.textContent = '×';
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteSession(session.id);
+        };
+        
+        item.appendChild(name);
+        item.appendChild(preview);
+        item.appendChild(deleteBtn);
+        sessionList.appendChild(item);
+    });
 }
 
 function toggleDarkMode() {

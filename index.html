@@ -5,11 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini AI Chat</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
+    <script src="marked.min.js"></script>
     <script src="config.js"></script>
 </head>
 <body>
-    <div class="container">
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>Chat Sessions</h3>
+                <button class="new-session-btn" onclick="createNewSession()">+ New</button>
+            </div>
+            <div class="session-list" id="sessionList"></div>
+        </div>
+        <div class="container">
         <div class="header">
             <h2>Gemini AI Chatbot</h2>
             <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
@@ -31,6 +39,7 @@
             <input type="text" id="userInput" placeholder="Type a message...">
             <button id="sendBtn" onclick="sendMessage()">Send</button>
         </div>
+    </div>
     </div>
 
     <script src="script.js"></script>
