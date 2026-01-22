@@ -9,6 +9,15 @@
     <script src="config.js"></script>
 </head>
 <body>
+    <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-modal">
+            <h1>Welcome to Gemini AI Chatbot</h1>
+            <p>Let's get started! What's your name?</p>
+            <input type="text" id="userName" placeholder="Enter your name" maxlength="30">
+            <button onclick="saveUserName()">Get Started</button>
+        </div>
+    </div>
+
     <div class="main-container">
         <div class="sidebar">
             <div class="sidebar-header">
