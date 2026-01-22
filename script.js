@@ -313,6 +313,57 @@ function stopListening() {
     userInput.placeholder = 'Type a message...';
 }
 
+function checkUserProfile() {
+    const savedName = localStorage.getItem('userName');
+    if (savedName) {
+        userName = savedName;
+        showMainApp();
+    } else {
+        welcomeScreen.classList.remove('hidden');
+        mainContainer.classList.add('hidden');
+        
+        const userNameInput = document.getElementById('userName');
+        userNameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                saveUserName();
+            }
+        });
+    }
+}
+
+function saveUserName() {
+    const input = document.getElementById('userName');
+    const name = input.value.trim();
+    
+    if (!name) {
+        alert('Please enter your name');
+        return;
+    }
+    
+    userName = name;
+    localStorage.setItem('userName', userName);
+    showMainApp();
+}
+
+function showMainApp() {
+    welcomeScreen.classList.add('hidden');
+    mainContainer.classList.remove('hidden');
+    updateHeaderTitle();
+    loadSessions();
+}
+
+function updateHeaderTitle() {
+    const greetings = [
+        `What do you want to build today, ${userName}?`,
+        `Hey ${userName}, ready to create something?`,
+        `Welcome back, ${userName}!`,
+        `Let's build something amazing, ${userName}!`
+    ];
+    
+    const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+    headerTitle.textContent = randomGreeting;
+}
+
 async function sendMessage() {
     const message = userInput.value.trim();
     
