@@ -138,6 +138,14 @@ function deleteSession(sessionId) {
     }
 }
 
+function renameSession(sessionId, newName) {
+    if (sessions[sessionId]) {
+        sessions[sessionId].name = newName.trim() || 'New Chat';
+        saveSessions();
+        renderSessionList();
+    }
+}
+
 function saveCurrentSession() {
     if (currentSessionId && sessions[currentSessionId]) {
         sessions[currentSessionId].messages = chatBox.innerHTML;
@@ -169,6 +177,10 @@ function renderSessionList() {
         const name = document.createElement('div');
         name.className = 'session-name';
         name.textContent = session.name;
+        name.ondblclick = (e) => {
+            e.stopPropagation();
+            makeEditable(name, session.id);
+        };
         
         const preview = document.createElement('div');
         preview.className = 'session-preview';
@@ -187,6 +199,31 @@ function renderSessionList() {
         item.appendChild(deleteBtn);
         sessionList.appendChild(item);
     });
+}
+
+function makeEditable(nameElement, sessionId) {
+    const currentName = nameElement.textContent;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'session-name-input';
+    input.value = currentName;
+    
+    input.onblur = () => {
+        renameSession(sessionId, input.value);
+    };
+    
+    input.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+            input.blur();
+        } else if (e.key === 'Escape') {
+            renderSessionList();
+        }
+    };
+    
+    nameElement.parentElement.onclick = (e) => e.stopPropagation();
+    nameElement.replaceWith(input);
+    input.focus();
+    input.select();
 }
 
 function toggleDarkMode() {

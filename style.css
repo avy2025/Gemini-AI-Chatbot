@@ -109,6 +109,19 @@ body.dark-mode .session-item.active {
     font-size: 14px;
     font-weight: 500;
     margin-bottom: 3px;
+    cursor: text;
+}
+
+.session-name-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: inherit;
+    outline: none;
+    padding: 0;
+    margin-bottom: 3px;
 }
 
 .session-preview {
