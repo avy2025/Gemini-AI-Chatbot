@@ -250,6 +250,69 @@ function askQuestion(question) {
     sendMessage();
 }
 
+function initVoiceRecognition() {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+        
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            userInput.value = transcript;
+            stopListening();
+        };
+        
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            stopListening();
+            if (event.error === 'not-allowed') {
+                alert('Microphone access denied. Please allow microphone access.');
+            }
+        };
+        
+        recognition.onend = () => {
+            stopListening();
+        };
+    } else {
+        voiceBtn.style.display = 'none';
+    }
+}
+
+function toggleVoiceInput() {
+    if (!recognition) {
+        alert('Voice input is not supported in your browser');
+        return;
+    }
+    
+    if (isListening) {
+        stopListening();
+    } else {
+        startListening();
+    }
+}
+
+function startListening() {
+    try {
+        recognition.start();
+        isListening = true;
+        voiceBtn.classList.add('listening');
+        userInput.placeholder = 'Listening...';
+    } catch (error) {
+        console.error('Error starting recognition:', error);
+    }
+}
+
+function stopListening() {
+    if (recognition && isListening) {
+        recognition.stop();
+    }
+    isListening = false;
+    voiceBtn.classList.remove('listening');
+    userInput.placeholder = 'Type a message...';
+}
+
 async function sendMessage() {
     const message = userInput.value.trim();
     

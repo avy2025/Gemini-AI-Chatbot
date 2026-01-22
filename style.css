@@ -360,6 +360,43 @@ button:disabled {
     cursor: not-allowed;
 }
 
+.voice-btn {
+    padding: 10px 15px;
+    background-color: #fff;
+    color: #4285f4;
+    border: 2px solid #4285f4;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.voice-btn:hover {
+    background-color: #4285f4;
+    color: white;
+}
+
+.voice-btn.listening {
+    background-color: #f44336;
+    border-color: #f44336;
+    color: white;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+body.dark-mode .voice-btn {
+    background-color: #3a3a3a;
+    border-color: #4285f4;
+}
+
 .loading {
     color: #666;
     font-style: italic;
