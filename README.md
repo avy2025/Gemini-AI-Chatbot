@@ -24,14 +24,16 @@ A clean and modern AI chatbot web application powered by Google's Gemini AI API.
 
 ```
 Gemini-AI-Chatbot/
-├── index.html           # Main HTML file
-├── style.css            # Stylesheet
-├── script.js            # JavaScript logic
-├── config.js            # API configuration (not tracked)
-├── config.example.js    # Config template
-├── marked.min.js        # Markdown parser (optional)
-├── .gitignore           # Git ignore rules
-└── README.md            # Documentation
+├── css/
+│   └── style.css            # Stylesheet
+├── js/
+│   ├── script.js            # JavaScript logic
+│   ├── config.js            # API configuration (not tracked)
+│   └── config.example.js    # Config template
+├── index.html               # Main HTML file
+├── GITHUB_SETUP.md          # Guide for GitHub metadata
+├── .gitignore               # Git ignore rules
+└── README.md                # Documentation
 ```
 
 ## 🛠️ Technologies Used
@@ -64,10 +66,10 @@ cd Gemini-AI-Chatbot
 ### 3. Configure the API Key
 
 ```bash
-cp config.example.js config.js
+cp js/config.example.js js/config.js
 ```
 
-Open `config.js` and add your API key:
+Open `js/config.js` and add your API key:
 
 ```javascript
 const CONFIG = {
