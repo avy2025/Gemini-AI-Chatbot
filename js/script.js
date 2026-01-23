@@ -2,17 +2,31 @@ const API_KEY = CONFIG.GEMINI_API_KEY;
 const chatBox = document.getElementById("chatBox");
 const userInput = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
+const welcomeScreen = document.getElementById("welcomeScreen");
+const mainContainer = document.querySelector(".main-container");
+const headerTitle = document.querySelector(".header h2");
+const sessionList = document.getElementById("sessionList");
+const voiceBtn = document.getElementById("voiceBtn");
+
+let userName = "";
+let sessions = {};
+let currentSessionId = "";
+let recognition = null;
+let isListening = false;
+
+// Configure marked options
+if (typeof marked !== 'undefined') {
+    marked.setOptions({
+        breaks: true,
+        gfm: true
+    });
+}
 
 // Load saved chat history on page load
 window.addEventListener('DOMContentLoaded', function() {
-    loadChatHistory();
+    checkUserProfile();
     loadDarkMode();
-});
-
-userInput.addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-        sendMessage();
-    }
+    initVoiceRecognition();
 });
 
 // Character counter
@@ -34,7 +48,17 @@ function addMessage(text, isUser) {
     
     const textDiv = document.createElement("div");
     textDiv.className = "msg-text";
-    textDiv.textContent = text;
+    
+    if (isUser) {
+        textDiv.textContent = text;
+    } else {
+        // Use marked for AI messages
+        if (typeof marked !== 'undefined') {
+            textDiv.innerHTML = marked.parse(text);
+        } else {
+            textDiv.textContent = text;
+        }
+    }
     
     msgDiv.appendChild(textDiv);
     chatBox.appendChild(msgDiv);

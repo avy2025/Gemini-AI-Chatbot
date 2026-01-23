@@ -1,6 +1,7 @@
 # Environment variables
 .env
 config.js
+js/config.js
 
 # OS files
 .DS_Store
