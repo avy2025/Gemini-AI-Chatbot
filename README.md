@@ -18,6 +18,8 @@ A clean and modern AI chatbot web application powered by Google's Gemini AI API.
 - 🧹 **Clear Chat** - Reset conversation anytime
 - ⌨️ **Keyboard Support** - Press Enter to send messages
 - 📊 **Character Counter** - Track message length (500 char limit)
+- 🎙️ **Voice Input** - Speak your message using STT
+- 🔊 **Voice Response** - AI responses read aloud via TTS
 - 📱 **Responsive Design** - Works on desktop and mobile
 
 ## 📁 Project Structure
@@ -109,6 +111,12 @@ Click the 🌙/☀️ button in the header to toggle dark mode. Your preference 
 ### Clear Chat
 Click **Clear Chat** to reset the conversation and remove all messages.
 
+### Voice Input
+Click the 🎤 button in the input area and speak. Your voice will be converted to text automatically.
+
+### Voice Response
+Click the 🔊/🔇 button in the header to toggle voice responses. When enabled, the AI's response will be read aloud.
+
 ## 🔧 Configuration
 
 ### Markdown Support
@@ -160,9 +168,9 @@ This project follows conventional commits:
 
 ## 🗺️ Roadmap
 
-- [ ] Voice input support
+- [x] Voice input and output support
 - [ ] Export chat as PDF
-- [ ] Multiple chat sessions
+- [x] Multiple chat sessions
 - [ ] Image generation support
 - [ ] Settings panel for customization
 - [ ] Mobile app version
