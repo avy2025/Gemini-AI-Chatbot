@@ -13,6 +13,8 @@ let sessions = {};
 let currentSessionId = "";
 let recognition = null;
 let isListening = false;
+let isVoiceEnabled = true; // New state for TTS
+let synth = window.speechSynthesis;
 
 // Configure marked options
 if (typeof marked !== 'undefined') {
@@ -23,18 +25,18 @@ if (typeof marked !== 'undefined') {
 }
 
 // Load saved chat history on page load
-window.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('DOMContentLoaded', function () {
     checkUserProfile();
     loadDarkMode();
     initVoiceRecognition();
 });
 
 // Character counter
-userInput.addEventListener('input', function() {
+userInput.addEventListener('input', function () {
     const charCount = document.getElementById('charCount');
     const length = this.value.length;
     charCount.textContent = `${length}/500`;
-    
+
     if (length > 500) {
         charCount.style.color = 'red';
     } else {
@@ -45,10 +47,10 @@ userInput.addEventListener('input', function() {
 function addMessage(text, isUser) {
     const msgDiv = document.createElement("div");
     msgDiv.className = isUser ? "message user-msg" : "message ai-msg";
-    
+
     const textDiv = document.createElement("div");
     textDiv.className = "msg-text";
-    
+
     if (isUser) {
         textDiv.textContent = text;
     } else {
@@ -59,13 +61,18 @@ function addMessage(text, isUser) {
             textDiv.textContent = text;
         }
     }
-    
+
     msgDiv.appendChild(textDiv);
     chatBox.appendChild(msgDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
-    
+
     // Save chat history after each message
     saveChatHistory();
+
+    // Speak AI response if voice is enabled and it's an AI message
+    if (!isUser && isVoiceEnabled) {
+        speakText(text);
+    }
 }
 
 function showLoading() {
@@ -103,7 +110,7 @@ function loadSessions() {
     if (saved) {
         sessions = JSON.parse(saved);
     }
-    
+
     if (Object.keys(sessions).length === 0) {
         createNewSession();
     } else {
@@ -114,7 +121,7 @@ function loadSessions() {
             switchSession(Object.keys(sessions)[0]);
         }
     }
-    
+
     renderSessionList();
 }
 
@@ -126,7 +133,7 @@ function createNewSession() {
         messages: '<div class="message ai-msg"><div class="msg-text">Hello! Ask me anything.</div></div>',
         createdAt: Date.now()
     };
-    
+
     saveSessions();
     switchSession(sessionId);
     renderSessionList();
@@ -136,7 +143,7 @@ function switchSession(sessionId) {
     if (currentSessionId) {
         saveCurrentSession();
     }
-    
+
     currentSessionId = sessionId;
     localStorage.setItem('lastSessionId', sessionId);
     loadChatHistory();
@@ -148,16 +155,16 @@ function deleteSession(sessionId) {
         alert('Cannot delete the last session');
         return;
     }
-    
+
     if (confirm('Delete this chat session?')) {
         delete sessions[sessionId];
         saveSessions();
-        
+
         if (currentSessionId === sessionId) {
             const newSessionId = Object.keys(sessions)[0];
             switchSession(newSessionId);
         }
-        
+
         renderSessionList();
     }
 }
@@ -173,13 +180,13 @@ function renameSession(sessionId, newName) {
 function saveCurrentSession() {
     if (currentSessionId && sessions[currentSessionId]) {
         sessions[currentSessionId].messages = chatBox.innerHTML;
-        
+
         const lastMsg = chatBox.querySelector('.message:last-child .msg-text');
         if (lastMsg) {
             const preview = lastMsg.textContent.substring(0, 30);
             sessions[currentSessionId].preview = preview;
         }
-        
+
         saveSessions();
     }
 }
@@ -190,14 +197,14 @@ function saveSessions() {
 
 function renderSessionList() {
     sessionList.innerHTML = '';
-    
+
     const sortedSessions = Object.values(sessions).sort((a, b) => b.createdAt - a.createdAt);
-    
+
     sortedSessions.forEach(session => {
         const item = document.createElement('div');
         item.className = 'session-item' + (session.id === currentSessionId ? ' active' : '');
         item.onclick = () => switchSession(session.id);
-        
+
         const name = document.createElement('div');
         name.className = 'session-name';
         name.textContent = session.name;
@@ -205,11 +212,11 @@ function renderSessionList() {
             e.stopPropagation();
             makeEditable(name, session.id);
         };
-        
+
         const preview = document.createElement('div');
         preview.className = 'session-preview';
         preview.textContent = session.preview || 'New conversation';
-        
+
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-session';
         deleteBtn.textContent = '×';
@@ -217,7 +224,7 @@ function renderSessionList() {
             e.stopPropagation();
             deleteSession(session.id);
         };
-        
+
         item.appendChild(name);
         item.appendChild(preview);
         item.appendChild(deleteBtn);
@@ -231,11 +238,11 @@ function makeEditable(nameElement, sessionId) {
     input.type = 'text';
     input.className = 'session-name-input';
     input.value = currentName;
-    
+
     input.onblur = () => {
         renameSession(sessionId, input.value);
     };
-    
+
     input.onkeydown = (e) => {
         if (e.key === 'Enter') {
             input.blur();
@@ -243,7 +250,7 @@ function makeEditable(nameElement, sessionId) {
             renderSessionList();
         }
     };
-    
+
     nameElement.parentElement.onclick = (e) => e.stopPropagation();
     nameElement.replaceWith(input);
     input.focus();
@@ -254,10 +261,46 @@ function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
     localStorage.setItem('darkMode', isDark);
-    
+
     // Change button emoji
     const btn = document.querySelector('.dark-mode-toggle');
     btn.textContent = isDark ? '☀️' : '🌙';
+}
+
+function toggleVoiceResponse() {
+    isVoiceEnabled = !isVoiceEnabled;
+    const voiceToggleBtn = document.getElementById('voiceToggleBtn');
+    if (isVoiceEnabled) {
+        voiceToggleBtn.textContent = '🔊';
+        voiceToggleBtn.title = 'Mute Voice';
+    } else {
+        voiceToggleBtn.textContent = '🔇';
+        voiceToggleBtn.title = 'Unmute Voice';
+        if (synth.speaking) {
+            synth.cancel();
+        }
+    }
+}
+
+function speakText(text) {
+    if (!synth) return;
+
+    // Cancel any ongoing speech
+    if (synth.speaking) {
+        synth.cancel();
+    }
+
+    // Clean text for speech (remove markdown)
+    const cleanText = text.replace(/[#*`_~]/g, '').trim();
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = 'en-US';
+
+    // You can customize voice here if needed
+    // const voices = synth.getVoices();
+    // utterance.voice = voices[0]; 
+
+    synth.speak(utterance);
 }
 
 function loadDarkMode() {
@@ -281,13 +324,13 @@ function initVoiceRecognition() {
         recognition.continuous = false;
         recognition.interimResults = false;
         recognition.lang = 'en-US';
-        
+
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript;
             userInput.value = transcript;
             stopListening();
         };
-        
+
         recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
             stopListening();
@@ -295,7 +338,7 @@ function initVoiceRecognition() {
                 alert('Microphone access denied. Please allow microphone access.');
             }
         };
-        
+
         recognition.onend = () => {
             stopListening();
         };
@@ -309,7 +352,7 @@ function toggleVoiceInput() {
         alert('Voice input is not supported in your browser');
         return;
     }
-    
+
     if (isListening) {
         stopListening();
     } else {
@@ -345,9 +388,9 @@ function checkUserProfile() {
     } else {
         welcomeScreen.classList.remove('hidden');
         mainContainer.classList.add('hidden');
-        
+
         const userNameInput = document.getElementById('userName');
-        userNameInput.addEventListener('keypress', function(e) {
+        userNameInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 saveUserName();
             }
@@ -358,12 +401,12 @@ function checkUserProfile() {
 function saveUserName() {
     const input = document.getElementById('userName');
     const name = input.value.trim();
-    
+
     if (!name) {
         alert('Please enter your name');
         return;
     }
-    
+
     userName = name;
     localStorage.setItem('userName', userName);
     showMainApp();
@@ -383,14 +426,14 @@ function updateHeaderTitle() {
         `Welcome back, ${userName}!`,
         `Let's build something amazing, ${userName}!`
     ];
-    
+
     const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
     headerTitle.textContent = randomGreeting;
 }
 
 async function sendMessage() {
     const message = userInput.value.trim();
-    
+
     if (!message) return;
 
     if (API_KEY === "YOUR_API_KEY_HERE") {
@@ -410,9 +453,9 @@ async function sendMessage() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    contents: [{ 
-                        role: "user", 
-                        parts: [{ text: message }] 
+                    contents: [{
+                        role: "user",
+                        parts: [{ text: message }]
                     }]
                 })
             }
