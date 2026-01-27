@@ -1,0 +1,17 @@
+{
+  "name": "gemini-ai-chatbot",
+  "version": "2.0.0",
+  "description": "Advanced Gemini AI Chatbot with backend and modern features",
+  "scripts": {
+    "server": "cd server && npm run dev",
+    "client": "cd client && python -m http.server 8080",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-all": "cd server && npm install"
+  },
+  "keywords": ["gemini", "ai", "chatbot", "nodejs", "express"],
+  "author": "avy2025",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
