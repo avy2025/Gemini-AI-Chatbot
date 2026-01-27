@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini AI Chatbot</title>
+    <link rel="stylesheet" href="src/css/styles.css">
+    <link rel="stylesheet" href="src/css/chat.css">
+    <link rel="stylesheet" href="src/css/themes.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="chat-header">
+            <div class="header-left">
+                <h1>Gemini AI Chatbot</h1>
+                <span class="status-indicator" id="status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Ready</span>
+                </span>
+            </div>
+            <div class="header-right">
+                <button id="themeToggle" class="icon-btn" title="Toggle Theme">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </button>
+                <button id="clearChat" class="icon-btn" title="Clear Chat">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" />
+                    </svg>
+                </button>
+                <button id="exportChat" class="icon-btn" title="Export Chat">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Chat Container -->
+        <main class="chat-container" id="chatContainer">
+            <div class="welcome-message">
+                <div class="welcome-icon">🤖</div>
+                <h2>Welcome to Gemini AI Chatbot</h2>
+                <p>Start a conversation by typing a message below</p>
+                <div class="suggested-prompts">
+                    <button class="prompt-btn" data-prompt="What can you help me with?">What can you help me
+                        with?</button>
+                    <button class="prompt-btn" data-prompt="Tell me a joke">Tell me a joke</button>
+                    <button class="prompt-btn" data-prompt="Explain quantum computing">Explain quantum
+                        computing</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Input Area -->
+        <footer class="chat-input-container">
+            <div class="input-wrapper">
+                <textarea id="messageInput" placeholder="Type your message here..." rows="1"
+                    maxlength="4000"></textarea>
+                <div class="input-actions">
+                    <span class="char-counter" id="charCounter">0/4000</span>
+                    <button id="sendButton" class="send-btn" disabled>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="src/js/app.js"></script>
+</body>
+
+</html>
