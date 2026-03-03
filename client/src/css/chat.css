@@ -1,4 +1,8 @@
-/* Chat Container */
+/* ═══════════════════════════════════════════════
+   chat.css — Chat layout, messages, formatting
+═══════════════════════════════════════════════ */
+
+/* ─── Chat Container ─── */
 .chat-container {
     flex: 1;
     overflow-y: auto;
@@ -7,7 +11,7 @@
 }
 
 .chat-container::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 
 .chat-container::-webkit-scrollbar-track {
@@ -23,7 +27,7 @@
     background: var(--text-secondary);
 }
 
-/* Welcome Message */
+/* ─── Welcome Screen ─── */
 .welcome-message {
     text-align: center;
     max-width: 600px;
@@ -73,7 +77,7 @@
     box-shadow: var(--shadow-lg);
 }
 
-/* Messages */
+/* ─── Message Bubbles ─── */
 .message {
     display: flex;
     gap: 1rem;
@@ -114,20 +118,24 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    min-width: 0;
+    /* allow text to shrink inside flex */
 }
 
 .message-text {
     background-color: var(--surface-color);
     padding: 1rem 1.25rem;
     border-radius: 12px;
-    line-height: 1.6;
-    white-space: pre-wrap;
+    line-height: 1.7;
     word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .user-message .message-text {
     background-color: var(--primary-color);
     color: white;
+    white-space: pre-wrap;
+    /* preserve line breaks in user messages */
 }
 
 .message-time {
@@ -136,26 +144,28 @@
     padding: 0 0.5rem;
 }
 
-/* Typing Indicator */
+/* ─── Typing Indicator ─── */
 .typing-indicator {
-    opacity: 0.7;
+    opacity: 0.85;
 }
 
 .typing-dots {
     display: flex;
-    gap: 0.25rem;
+    gap: 6px;
     padding: 1rem 1.25rem;
     background-color: var(--surface-color);
     border-radius: 12px;
     width: fit-content;
+    align-items: center;
 }
 
 .typing-dots span {
-    width: 8px;
-    height: 8px;
-    background-color: var(--text-secondary);
+    width: 9px;
+    height: 9px;
+    background-color: var(--primary-color);
     border-radius: 50%;
-    animation: bounce 1.4s infinite;
+    animation: typingBounce 1.2s ease-in-out infinite;
+    opacity: 0.6;
 }
 
 .typing-dots span:nth-child(2) {
@@ -166,25 +176,27 @@
     animation-delay: 0.4s;
 }
 
-@keyframes bounce {
+@keyframes typingBounce {
 
     0%,
     60%,
     100% {
         transform: translateY(0);
+        opacity: 0.6;
     }
 
     30% {
-        transform: translateY(-10px);
+        transform: translateY(-8px);
+        opacity: 1;
     }
 }
 
-/* Error Message */
+/* ─── Error Banner ─── */
 .error-message {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 1rem 1.25rem;
+    padding: 0.875rem 1.25rem;
     background-color: rgba(234, 67, 53, 0.1);
     border: 1px solid var(--error-color);
     border-radius: 8px;
@@ -201,15 +213,15 @@
     }
 
     25% {
-        transform: translateX(-10px);
+        transform: translateX(-8px);
     }
 
     75% {
-        transform: translateX(10px);
+        transform: translateX(8px);
     }
 }
 
-/* Input Container */
+/* ─── Input Container ─── */
 .chat-input-container {
     padding: 1rem 1.5rem;
     background-color: var(--surface-color);
@@ -245,6 +257,7 @@
     font-size: 1rem;
     background-color: transparent;
     color: var(--text-color);
+    line-height: 1.5;
 }
 
 #messageInput::placeholder {
@@ -257,15 +270,25 @@
     align-items: center;
 }
 
+/* ─── Character Counter ─── */
 .char-counter {
     font-size: 0.75rem;
     color: var(--text-secondary);
+    transition: color 0.2s;
+    font-variant-numeric: tabular-nums;
 }
 
 .char-counter.warning {
-    color: #fbbc04;
+    color: #f59e0b;
+    font-weight: 600;
 }
 
+.char-counter.error {
+    color: var(--error-color);
+    font-weight: 700;
+}
+
+/* ─── Send Button ─── */
 .send-btn {
     padding: 0.5rem;
     background-color: var(--primary-color);
@@ -277,10 +300,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .send-btn:hover:not(:disabled) {
-    background-color: #1a73e8;
+    filter: brightness(1.15);
     transform: scale(1.05);
 }
 
@@ -290,10 +314,135 @@
     opacity: 0.5;
 }
 
-/* Responsive */
+/* ══════════════════════════════════════════════
+   Code Block Styles
+══════════════════════════════════════════════ */
+
+.code-block {
+    position: relative;
+    background-color: #1e1e2e;
+    /* Dark background regardless of theme */
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 0.75rem 0;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Header row: language label + copy button */
+.code-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0.75rem;
+    background-color: #13131f;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.code-lang {
+    font-size: 0.7rem;
+    font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    color: #a6adc8;
+    text-transform: lowercase;
+    letter-spacing: 0.04em;
+}
+
+/* Copy button inside code block header */
+.code-copy-btn {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.7rem;
+    font-family: inherit;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #cdd6f4;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+    line-height: 1.4;
+}
+
+.code-copy-btn:hover {
+    background-color: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+}
+
+.code-copy-btn.copied {
+    background-color: rgba(166, 227, 161, 0.2);
+    color: #a6e3a1;
+    border-color: rgba(166, 227, 161, 0.3);
+}
+
+/* Scrollable <pre> wrapper */
+.code-block pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.code-block pre::-webkit-scrollbar {
+    height: 5px;
+}
+
+.code-block pre::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.code-block pre code {
+    font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: #cdd6f4;
+    line-height: 1.6;
+    white-space: pre;
+    /* honour intentional whitespace */
+    tab-size: 4;
+    display: block;
+}
+
+/* ─── Inline Code ─── */
+.inline-code {
+    font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 0.875em;
+    padding: 0.15em 0.4em;
+    background-color: var(--code-inline-bg, rgba(135, 135, 179, 0.15));
+    color: var(--code-inline-color, #d97706);
+    border-radius: 4px;
+    border: 1px solid var(--code-inline-border, rgba(135, 135, 179, 0.2));
+    white-space: nowrap;
+    vertical-align: baseline;
+}
+
+[data-theme="dark"] .inline-code {
+    background-color: rgba(205, 214, 244, 0.1);
+    color: #f38ba8;
+    border-color: rgba(205, 214, 244, 0.15);
+}
+
+/* ─── Auto-linked URLs ─── */
+.chat-link {
+    color: var(--primary-color);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    word-break: break-all;
+}
+
+.chat-link:hover {
+    opacity: 0.8;
+}
+
+/* ═══════════════════════════════════════════════
+   Responsive
+═══════════════════════════════════════════════ */
 @media (max-width: 768px) {
     .chat-container {
         padding: 1rem;
+    }
+
+    .chat-input-container {
+        padding: 0.75rem 1rem;
     }
 
     .message {
@@ -306,11 +455,12 @@
         font-size: 1.25rem;
     }
 
-    .chat-input-container {
-        padding: 0.75rem 1rem;
+    .code-block pre code {
+        font-size: 0.8rem;
     }
 }
 
+/* ─── Utility animations ─── */
 @keyframes fadeIn {
     from {
         opacity: 0;
