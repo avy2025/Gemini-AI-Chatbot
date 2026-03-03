@@ -1,5 +1,20 @@
+/**
+ * app.js
+ * Application entry point.
+ * Orchestrates: ChatUI (ui.js), ChatAPI (api.js), Storage (storage.js).
+ * Keeps framework-free ES6+ class-based architecture.
+ */
+
 import chatAPI from './api.js';
-import { ChatUI } from './ui.js';
+import { ChatUI, MAX_CHARS } from './ui.js';
+import {
+    initStorage,
+    saveMessage,
+    loadAllMessages,
+    clearAllMessages,
+    exportMessages,
+    importMessages,
+} from './storage.js';
 
 class ChatApp {
     constructor() {
@@ -10,17 +25,27 @@ class ChatApp {
         this.init();
     }
 
-    init() {
-        this.setupEventListeners();
+    async init() {
         this.applyTheme();
         this.adjustTextareaHeight();
+
+        // Initialise persistent storage before rendering
+        await initStorage();
+        await this.loadHistory();
+
+        // Wire up all user interactions only after storage is ready
+        this.setupEventListeners();
     }
 
+    /* ───────────────────────────────────────────
+       Event listeners
+    ─────────────────────────────────────────── */
+
     setupEventListeners() {
-        // Send message
+        // ── Send message ──
         this.ui.sendButton.addEventListener('click', () => this.handleSendMessage());
 
-        // Enter to send (Shift+Enter for new line)
+        // Enter = send, Shift+Enter = new line
         this.ui.messageInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -28,58 +53,73 @@ class ChatApp {
             }
         });
 
-        // Auto-resize textarea
+        // Live char counter + auto-resize textarea
         this.ui.messageInput.addEventListener('input', () => {
             this.adjustTextareaHeight();
             this.ui.updateCharCounter();
-            this.ui.sendButton.disabled = this.ui.messageInput.value.trim().length === 0;
         });
 
-        // Theme toggle
-        document.getElementById('themeToggle').addEventListener('click', () => {
-            this.toggleTheme();
+        // ── Header actions ──
+        document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
+        document.getElementById('clearChat').addEventListener('click', () => this.clearChat());
+        document.getElementById('exportChat').addEventListener('click', () => this.exportChat());
+
+        // ── Import: trigger hidden file input ──
+        document.getElementById('importChat').addEventListener('click', () => {
+            document.getElementById('importFileInput').click();
         });
 
-        // Clear chat
-        document.getElementById('clearChat').addEventListener('click', () => {
-            this.clearChat();
+        document.getElementById('importFileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) this.importChat(file);
+            // Reset so the same file can be picked again
+            e.target.value = '';
         });
 
-        // Export chat
-        document.getElementById('exportChat').addEventListener('click', () => {
-            this.exportChat();
-        });
-
-        // Suggested prompts
+        // ── Suggested prompts (delegated) ──
         this.ui.chatContainer.addEventListener('click', (e) => {
             if (e.target.classList.contains('prompt-btn')) {
-                const prompt = e.target.dataset.prompt;
-                this.ui.messageInput.value = prompt;
+                this.ui.messageInput.value = e.target.dataset.prompt;
+                this.ui.updateCharCounter();
+                this.adjustTextareaHeight();
                 this.handleSendMessage();
             }
         });
     }
 
+    /* ───────────────────────────────────────────
+       Messaging
+    ─────────────────────────────────────────── */
+
     async handleSendMessage() {
         const message = this.ui.messageInput.value.trim();
 
-        if (!message || this.isStreaming) return;
+        // Guard: empty, over-limit, or mid-stream
+        if (!message || message.length > MAX_CHARS || this.isStreaming) return;
 
-        // Add user message to UI
-        this.ui.addMessage(message, true);
+        const timeLabel = this.ui.getCurrentTime();
+
+        // Add user message to UI and persist it
+        this.ui.addMessage(message, true, timeLabel);
+        await saveMessage('user', message, timeLabel);
+
+        // Reset input
         this.ui.messageInput.value = '';
         this.adjustTextareaHeight();
         this.ui.updateCharCounter();
         this.ui.disableInput();
-        this.ui.setStatus('loading', 'Thinking...');
+
+        // Show typing indicator immediately
+        this.ui.addTypingIndicator();
+        this.ui.setStatus('loading', 'Thinking…');
 
         try {
-            // Use streaming for better UX
             await this.streamResponse(message);
         } catch (error) {
             console.error('Send message error:', error);
+            // Always remove typing indicator even on failure
             this.ui.removeTypingIndicator();
-            this.ui.showError('Failed to get response. Please try again.');
+            this.ui.showError('Failed to get a response. Please try again.');
             this.ui.setStatus('error', 'Error');
         } finally {
             this.ui.enableInput();
@@ -95,50 +135,85 @@ class ChatApp {
 
         await chatAPI.streamMessage(
             message,
-            // onChunk
+            // onChunk: first chunk → replace typing indicator with message bubble
             (chunk) => {
                 if (!messageElement) {
+                    this.ui.removeTypingIndicator();
                     messageElement = this.ui.addMessage('', false);
                 }
                 fullResponse += chunk;
                 this.ui.updateMessageText(messageElement, fullResponse);
             },
-            // onComplete
-            (sessionId) => {
-                console.log('Streaming complete', sessionId);
+            // onComplete: persist the full AI response
+            async (sessionId) => {
+                console.log('Stream complete. sessionId:', sessionId);
+                if (fullResponse) {
+                    const timeLabel = this.ui.getCurrentTime();
+                    await saveMessage('ai', fullResponse, timeLabel);
+                }
             },
-            // onError
-            (error) => {
-                throw error;
-            }
+            // onError: propagate so the outer try/catch handles UI
+            (error) => { throw error; }
         );
     }
 
-    async clearChat() {
-        if (confirm('Are you sure you want to clear the chat history?')) {
-            await chatAPI.clearHistory();
-            this.ui.clearChat();
-            this.ui.setStatus('ready', 'Ready');
+    /* ───────────────────────────────────────────
+       History: load on startup
+    ─────────────────────────────────────────── */
+
+    async loadHistory() {
+        const messages = await loadAllMessages();
+        if (messages.length === 0) return; // keep welcome screen
+
+        for (const msg of messages) {
+            this.ui.addMessage(msg.content, msg.role === 'user', msg.timeLabel);
         }
     }
 
-    exportChat() {
-        const messages = Array.from(this.ui.chatContainer.querySelectorAll('.message'));
-        const chatHistory = messages.map(msg => {
-            const isUser = msg.classList.contains('user-message');
-            const text = msg.querySelector('.message-text').textContent;
-            const time = msg.querySelector('.message-time')?.textContent || '';
-            return `[${time}] ${isUser ? 'You' : 'AI'}: ${text}`;
-        }).join('\n\n');
+    /* ───────────────────────────────────────────
+       History: clear / export / import
+    ─────────────────────────────────────────── */
 
-        const blob = new Blob([chatHistory], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `chat-history-${new Date().toISOString().split('T')[0]}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
+    async clearChat() {
+        if (!confirm('Are you sure you want to clear the chat history?')) return;
+
+        try {
+            await chatAPI.clearHistory();    // clear server-side session too
+            await clearAllMessages();        // clear IndexedDB / localStorage
+            this.ui.clearChat();
+            this.ui.setStatus('ready', 'Ready');
+        } catch (err) {
+            console.error('Clear chat error:', err);
+            this.ui.showError('Failed to clear chat history.');
+        }
     }
+
+    async exportChat() {
+        try {
+            await exportMessages();
+        } catch (err) {
+            console.error('Export error:', err);
+            this.ui.showError('Failed to export chat. Please try again.');
+        }
+    }
+
+    async importChat(file) {
+        try {
+            const messages = await importMessages(file);
+            // Replay imported messages into the UI
+            this.ui.clearChat();
+            for (const msg of messages) {
+                this.ui.addMessage(msg.content, msg.role === 'user', msg.timeLabel);
+            }
+        } catch (err) {
+            console.error('Import error:', err);
+            this.ui.showError(`Import failed: ${err.message}`);
+        }
+    }
+
+    /* ───────────────────────────────────────────
+       Theme
+    ─────────────────────────────────────────── */
 
     toggleTheme() {
         this.theme = this.theme === 'light' ? 'dark' : 'light';
@@ -150,14 +225,16 @@ class ChatApp {
         document.body.setAttribute('data-theme', this.theme);
     }
 
+    /* ───────────────────────────────────────────
+       Utilities
+    ─────────────────────────────────────────── */
+
     adjustTextareaHeight() {
-        const textarea = this.ui.messageInput;
-        textarea.style.height = 'auto';
-        textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+        const ta = this.ui.messageInput;
+        ta.style.height = 'auto';
+        ta.style.height = Math.min(ta.scrollHeight, 150) + 'px';
     }
 }
 
-// Initialize app when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    new ChatApp();
-});
+// Bootstrap when DOM is ready
+document.addEventListener('DOMContentLoaded', () => { new ChatApp(); });
