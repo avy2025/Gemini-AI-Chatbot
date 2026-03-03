@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gemini AI Chatbot — a lightweight, production-quality AI chat interface.">
     <title>Gemini AI Chatbot</title>
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="src/css/styles.css">
     <link rel="stylesheet" href="src/css/chat.css">
     <link rel="stylesheet" href="src/css/themes.css">
@@ -12,74 +14,105 @@
 
 <body>
     <div class="app-container">
-        <!-- Header -->
-        <header class="chat-header">
+
+        <!-- ════════════════════════════════
+             Header
+        ════════════════════════════════ -->
+        <header class="chat-header" role="banner">
             <div class="header-left">
                 <h1>Gemini AI Chatbot</h1>
-                <span class="status-indicator" id="status">
-                    <span class="status-dot"></span>
+                <span class="status-indicator" id="status" aria-live="polite" aria-atomic="true">
+                    <span class="status-dot" aria-hidden="true"></span>
                     <span class="status-text">Ready</span>
                 </span>
             </div>
-            <div class="header-right">
-                <button id="themeToggle" class="icon-btn" title="Toggle Theme">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+
+            <div class="header-right" role="toolbar" aria-label="Chat actions">
+                <!-- Theme Toggle -->
+                <button id="themeToggle" class="icon-btn" title="Toggle Theme" aria-label="Toggle light/dark theme">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path
                             d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                 </button>
-                <button id="clearChat" class="icon-btn" title="Clear Chat">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+
+                <!-- Clear Chat -->
+                <button id="clearChat" class="icon-btn" title="Clear Chat" aria-label="Clear chat history">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        aria-hidden="true">
                         <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" />
                     </svg>
                 </button>
-                <button id="exportChat" class="icon-btn" title="Export Chat">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+
+                <!-- Export Chat -->
+                <button id="exportChat" class="icon-btn" title="Export Chat as JSON"
+                    aria-label="Export chat history as JSON">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        aria-hidden="true">
                         <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
                     </svg>
                 </button>
+
+                <!-- Import Chat (triggers hidden file input) -->
+                <button id="importChat" class="icon-btn" title="Import Chat from JSON"
+                    aria-label="Import chat history from JSON file">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        aria-hidden="true">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 14l5-5 5 5M12 9v12" />
+                    </svg>
+                </button>
+
+                <!-- Hidden file input for import; triggered programmatically -->
+                <input type="file" id="importFileInput" accept=".json,application/json"
+                    aria-label="Select JSON file to import" style="display:none">
             </div>
         </header>
 
-        <!-- Chat Container -->
-        <main class="chat-container" id="chatContainer">
+        <!-- ════════════════════════════════
+             Chat Area
+        ════════════════════════════════ -->
+        <main class="chat-container" id="chatContainer" role="log" aria-label="Chat messages" aria-live="polite">
             <div class="welcome-message">
-                <div class="welcome-icon">🤖</div>
+                <div class="welcome-icon" aria-hidden="true">🤖</div>
                 <h2>Welcome to Gemini AI Chatbot</h2>
                 <p>Start a conversation by typing a message below</p>
-                <div class="suggested-prompts">
-                    <button class="prompt-btn" data-prompt="What can you help me with?">What can you help me
-                        with?</button>
-                    <button class="prompt-btn" data-prompt="Tell me a joke">Tell me a joke</button>
-                    <button class="prompt-btn" data-prompt="Explain quantum computing">Explain quantum
-                        computing</button>
+                <div class="suggested-prompts" role="list">
+                    <button class="prompt-btn" data-prompt="What can you help me with?" role="listitem">
+                        What can you help me with?
+                    </button>
+                    <button class="prompt-btn" data-prompt="Tell me a joke" role="listitem">
+                        Tell me a joke
+                    </button>
+                    <button class="prompt-btn" data-prompt="Explain quantum computing" role="listitem">
+                        Explain quantum computing
+                    </button>
                 </div>
             </div>
         </main>
 
-        <!-- Input Area -->
-        <footer class="chat-input-container">
-            <div class="input-wrapper">
-                <textarea id="messageInput" placeholder="Type your message here..." rows="1"
-                    maxlength="4000"></textarea>
+        <!-- ════════════════════════════════
+             Input Area
+        ════════════════════════════════ -->
+        <footer class="chat-input-container" role="contentinfo">
+            <div class="input-wrapper" role="form" aria-label="Message input">
+                <textarea id="messageInput"
+                    placeholder="Type your message here… (Enter to send, Shift+Enter for new line)" rows="1"
+                    maxlength="2000" aria-label="Message input" aria-describedby="charCounter"
+                    aria-multiline="true"></textarea>
                 <div class="input-actions">
-                    <span class="char-counter" id="charCounter">0/4000</span>
-                    <button id="sendButton" class="send-btn" disabled>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <span class="char-counter" id="charCounter" aria-live="polite" aria-atomic="true">0/2000</span>
+                    <button id="sendButton" class="send-btn" disabled aria-label="Send message">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
                         </svg>
                     </button>
                 </div>
             </div>
         </footer>
-    </div>
 
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-    </div>
+    </div><!-- /.app-container -->
 
-    <!-- Scripts -->
+    <!-- Scripts (ES module) -->
     <script type="module" src="src/js/app.js"></script>
 </body>
 
