@@ -9,19 +9,31 @@ const generationConfig = {
     maxOutputTokens: 2048,
 };
 
-exports.generateResponse = async (message, history = []) => {
+exports.generateResponse = async (message, history = [], images = []) => {
     try {
         const model = genAI.getGenerativeModel({
             model: 'gemini-1.5-flash',
             generationConfig
         });
 
+        const promptParts = [message];
+        if (images && images.length > 0) {
+            images.forEach(img => {
+                promptParts.push({
+                    inlineData: {
+                        data: img.data,
+                        mimeType: img.mimeType
+                    }
+                });
+            });
+        }
+
         const chat = model.startChat({
             history: history,
             generationConfig,
         });
 
-        const result = await chat.sendMessage(message);
+        const result = await chat.sendMessage(promptParts);
         const response = await result.response;
         return response.text();
     } catch (error) {
@@ -30,19 +42,31 @@ exports.generateResponse = async (message, history = []) => {
     }
 };
 
-exports.generateStreamResponse = async (message, history = [], onChunk) => {
+exports.generateStreamResponse = async (message, history = [], onChunk, images = []) => {
     try {
         const model = genAI.getGenerativeModel({
             model: 'gemini-1.5-flash',
             generationConfig
         });
 
+        const promptParts = [message];
+        if (images && images.length > 0) {
+            images.forEach(img => {
+                promptParts.push({
+                    inlineData: {
+                        data: img.data,
+                        mimeType: img.mimeType
+                    }
+                });
+            });
+        }
+
         const chat = model.startChat({
             history: history,
             generationConfig,
         });
 
-        const result = await chat.sendMessageStream(message);
+        const result = await chat.sendMessageStream(promptParts);
 
         for await (const chunk of result.stream) {
             const chunkText = chunk.text();

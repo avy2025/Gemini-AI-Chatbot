@@ -47,7 +47,7 @@ exports.sendMessage = async (req, res, next) => {
 
 exports.streamMessage = async (req, res, next) => {
     try {
-        const { message, sessionId = uuidv4() } = req.body;
+        const { message, sessionId = uuidv4(), images } = req.body;
 
         if (!message || message.trim().length === 0) {
             return res.status(400).json({ error: 'Message is required' });
@@ -65,7 +65,7 @@ exports.streamMessage = async (req, res, next) => {
         await geminiService.generateStreamResponse(message, history, (chunk) => {
             fullResponse += chunk;
             res.write(`data: ${JSON.stringify({ chunk, done: false })}\n\n`);
-        });
+        }, images);
 
         // Update history
         history.push(
