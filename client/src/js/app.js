@@ -15,6 +15,7 @@ import {
     exportMessages,
     importMessages,
 } from './storage.js';
+import voiceHandler from './voice.js';
 
 class ChatApp {
     constructor() {
@@ -74,6 +75,24 @@ class ChatApp {
             if (file) this.importChat(file);
             // Reset so the same file can be picked again
             e.target.value = '';
+        });
+
+        // ── Voice Input ──
+        this.ui.voiceButton.addEventListener('click', () => this.handleVoiceInput());
+
+        // ── Search ──
+        this.ui.chatSearch.addEventListener('input', (e) => this.handleSearch(e.target.value));
+
+        // ── Image Attachment ──
+        this.ui.attachButton.addEventListener('click', () => this.ui.imageInput.click());
+        this.ui.imageInput.addEventListener('change', (e) => this.handleImageSelect(e));
+
+        // ── Speak Response (using delegation) ──
+        this.ui.chatContainer.addEventListener('click', (e) => {
+            const speakBtn = e.target.closest('.speak-btn');
+            if (speakBtn) {
+                voiceHandler.speak(speakBtn.dataset.text || speakBtn.parentElement.querySelector('.message-text').innerText);
+            }
         });
 
         // ── Suggested prompts (delegated) ──
@@ -223,6 +242,72 @@ class ChatApp {
 
     applyTheme() {
         document.body.setAttribute('data-theme', this.theme);
+    }
+
+    /* ───────────────────────────────────────────
+       Voice & Search
+    ─────────────────────────────────────────── */
+
+    async handleVoiceInput() {
+        if (voiceHandler.isListening) {
+            voiceHandler.stopListening();
+            this.ui.voiceButton.classList.remove('active');
+            return;
+        }
+
+        this.ui.voiceButton.classList.add('active');
+        try {
+            const transcript = await voiceHandler.startListening((interim) => {
+                this.ui.messageInput.value = transcript + interim;
+                this.adjustTextareaHeight();
+            });
+            this.ui.messageInput.value = transcript;
+            this.ui.updateCharCounter();
+        } catch (err) {
+            console.error('Voice input failed:', err);
+            this.ui.showError('Voice recognition failed or not supported.');
+        } finally {
+            this.ui.voiceButton.classList.remove('active');
+        }
+    }
+
+    handleSearch(query) {
+        const messages = this.ui.chatContainer.querySelectorAll('.message');
+        const searchTerm = query.toLowerCase();
+
+        messages.forEach(msg => {
+            if (msg.classList.contains('welcome-message')) return;
+            const text = msg.querySelector('.message-text').innerText.toLowerCase();
+            if (text.includes(searchTerm)) {
+                msg.style.display = 'flex';
+                // Highlight logic could be added here
+            } else {
+                msg.style.display = 'none';
+            }
+        });
+    }
+
+    handleImageSelect(e) {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        // Implementation of image preview logic would go here
+        this.ui.imagePreviewContainer.style.display = 'flex';
+        this.ui.imagePreviewContainer.innerHTML = '';
+
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const div = document.createElement('div');
+                div.className = 'image-preview';
+                div.innerHTML = `
+                    <img src="${event.target.result}" alt="Preview">
+                    <button class="remove-img-btn">×</button>
+                `;
+                this.ui.imagePreviewContainer.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
     }
 
     /* ───────────────────────────────────────────

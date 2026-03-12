@@ -18,6 +18,11 @@ export class ChatUI {
         this.sendButton = document.getElementById('sendButton');
         this.charCounter = document.getElementById('charCounter');
         this.statusIndicator = document.getElementById('status');
+        this.chatSearch = document.getElementById('chatSearch');
+        this.voiceButton = document.getElementById('voiceButton');
+        this.attachButton = document.getElementById('attachButton');
+        this.imageInput = document.getElementById('imageInput');
+        this.imagePreviewContainer = document.getElementById('imagePreviewContainer');
 
         // Sync HTML maxlength attribute with the constant
         this.messageInput.setAttribute('maxlength', MAX_CHARS);
@@ -75,6 +80,22 @@ export class ChatUI {
 
         contentDiv.appendChild(textDiv);
         contentDiv.appendChild(timeDiv);
+
+        // Add "Speak" button for AI messages
+        if (!isUser) {
+            const speakBtn = document.createElement('button');
+            speakBtn.className = 'icon-btn speak-btn';
+            speakBtn.title = 'Listen to response';
+            speakBtn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+            `;
+            speakBtn.dataset.text = content;
+            contentDiv.appendChild(speakBtn);
+        }
+
         messageDiv.appendChild(avatar);
         messageDiv.appendChild(contentDiv);
 
