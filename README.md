@@ -4,18 +4,23 @@
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
 
-An advanced, full-stack AI chatbot powered by Google's Gemini Pro model. This version features a modular architecture, secure backend, streaming responses, and a modern, responsive UI.
+An advanced, full-stack AI chatbot powered by Google's Gemini Pro model. This version features a modular architecture, secure backend, streaming responses, and a **premium, glassmorphism-inspired UI**.
+
+![Gemini AI Chatbot Demo](client/src/assets/images/screenshot.png)
 
 ## ✨ Features
 
+- 💎 **Premium Glassmorphism UI**: A stunning, modern design with translucent surfaces and fluid animations.
+- 🎙️ **Voice Interaction**: Integrated Speech-to-Text (STT) and Text-to-Speech (TTS) capabilities.
+- 🖼️ **Gemini Vision**: Multimodal support—upload and analyze images with the AI.
+- 🔍 **Smart Search**: Instant chat history filtering and message search.
 - 🚀 **Full-Stack Architecture**: Dedicated Node.js/Express backend for security and scalability.
 - 🌊 **Streaming Responses**: Real-time AI response generation for a better user experience.
 - 🌓 **Dark/Light Mode**: User-selectable themes with persistence.
 - 🛡️ **Secure Backend**: API keys protected in environment variables, rate limiting, and security headers.
 - 📱 **Responsive Design**: Optimized for both desktop and mobile devices.
 - 💾 **Session Management**: Session-based chat history to manage context.
-- 📤 **Export Chat**: Export your conversations as text files.
-- 🗑️ **Clear History**: Easily clear chat history to start fresh.
+- 📤 **Export/Import Chat**: Save and reload your conversations easily.
 
 ## 🏗️ Project Structure
 
